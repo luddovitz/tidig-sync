@@ -43,6 +43,24 @@ std::string formatUTCDate(const std::string& utcDateString) {
     return formattedDate.str();
 }
 
+std::time_t convertDateToUnixTime(const std::string& dateString) {
+    // Parse the input date string
+    std::tm timeStruct = {};
+    std::istringstream dateStream(dateString);
+    dateStream >> std::get_time(&timeStruct, "%Y-%m-%d");
+
+    if (dateStream.fail()) {
+        std::cerr << "Failed to parse the date string." << std::endl;
+        return -1; // Return an error value
+    }
+
+    // Convert std::tm to std::chrono::system_clock::time_point
+    auto timePoint = std::chrono::system_clock::from_time_t(std::mktime(&timeStruct));
+
+    // Convert std::chrono::system_clock::time_point to Unix time
+    return std::chrono::duration_cast<std::chrono::seconds>(timePoint.time_since_epoch()).count();
+}
+
 // Function to perform an HTTP GET request
 nlohmann::json performHttpGetRequest(const std::string& endpoint, const std::string& username, const std::string& password) {
 
@@ -79,9 +97,11 @@ int main() {
 
     while (!hasFetched) {
 
-        const std::string endpoint = "https://api.track.toggl.com/api/v9/me/time_entries";
+        std::string endpoint = "https://api.track.toggl.com/api/v9/me/time_entries";
         std::string username;
         std::string password;
+        std::string start_date;
+        std::string end_date;
 
         std::cout << "Enter username and password, then press enter." << std::endl;
 
@@ -91,7 +111,18 @@ int main() {
         std::cout << "Password: ";
         std::cin >> password;
 
+        std::cout << "Date from (YYYY-MM-DD): ";
+        std::cin >> start_date;
+
+        std::cout << "Date to (YYYY-MM-DD): ";
+        std::cin >> end_date;
+
         std::cout << "\nThanks, preparing your export. Please wait..." << std::endl;
+
+        endpoint += "?start_date=";
+        endpoint += start_date;
+        endpoint += "&end_date=";
+        endpoint += end_date;
 
         nlohmann::json toggleResponse = performHttpGetRequest(endpoint, username, password);
 
@@ -109,7 +140,6 @@ int main() {
                     workspace_id = entry["workspace_id"];
                     std::string workspace_id_string = std::to_string(workspace_id);
                     std::string workspaceEndpoint = "https://api.track.toggl.com/api/v9/workspaces/";
-                    workspaceEndpoint += workspace_id_string;
                 }
 
                 // Project id (needs to be null checked)
