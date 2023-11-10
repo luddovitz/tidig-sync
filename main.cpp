@@ -27,7 +27,6 @@ std::string formatUTCDate(const std::string& utcDateString) {
     std::tm currentTM = {};
     std::istringstream ss(utcDateString);
 
-    // Parse the input UTC date string
     ss >> std::get_time(&currentTM, "%Y-%m-%dT%H:%M:%S");
 
     if (ss.fail()) {
@@ -44,20 +43,17 @@ std::string formatUTCDate(const std::string& utcDateString) {
 }
 
 std::time_t convertDateToUnixTime(const std::string& dateString) {
-    // Parse the input date string
     std::tm timeStruct = {};
     std::istringstream dateStream(dateString);
     dateStream >> std::get_time(&timeStruct, "%Y-%m-%d");
 
     if (dateStream.fail()) {
         std::cerr << "Failed to parse the date string." << std::endl;
-        return -1; // Return an error value
+        return -1;
     }
 
-    // Convert std::tm to std::chrono::system_clock::time_point
     auto timePoint = std::chrono::system_clock::from_time_t(std::mktime(&timeStruct));
 
-    // Convert std::chrono::system_clock::time_point to Unix time
     return std::chrono::duration_cast<std::chrono::seconds>(timePoint.time_since_epoch()).count();
 }
 
@@ -93,9 +89,9 @@ nlohmann::json performHttpGetRequest(const std::string& endpoint, const std::str
 
 int main() {
 
-    bool hasFetched = false;
+    bool hasExportFinished = false;
 
-    while (!hasFetched) {
+    while (!hasExportFinished) {
 
         std::string endpoint = "https://api.track.toggl.com/api/v9/me/time_entries";
         std::string username;
@@ -179,7 +175,7 @@ int main() {
                     activity = entry["tags"][0];
                 }
 
-                // Date in correct format
+
                 csvFile <<
                         formatUTCDate(start_time) + ","
                         + "Normal" + ","
@@ -196,7 +192,7 @@ int main() {
             csvFile.close();
         }
         std::cout << "Export is completed." << std::endl;
-        hasFetched = true;
+        hasExportFinished = true;
     }
 
     return 0;
