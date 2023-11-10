@@ -3,7 +3,7 @@ project(tidig_sync)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(tidig_sync main.cpp)
+add_executable(main.cpp)
 
 find_package(CURL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
