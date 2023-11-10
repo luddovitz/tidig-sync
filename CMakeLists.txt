@@ -3,9 +3,6 @@ project("tidig_sync (Unix-OSX)")
 
 set(CMAKE_CXX_STANDARD 20)
 
-# Set the path to your cross-compilation toolchain file
-set(CMAKE_TOOLCHAIN_FILE /path/to/your/toolchain-file.cmake)
-
 add_executable(tidig_sync main.cpp)
 
 find_package(CURL REQUIRED)
